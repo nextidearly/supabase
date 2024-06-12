@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the User model
+model User {
+  id                   String       @id @default(uuid())
+  email                String       @unique
+  user_name            String
+  avatar_url           String
+  twitter_id           String
+  verified             Boolean
+
+  // Define relationships
+  tweets               Tweet[]
+  wallets              Wallet[]
+  userScores           UserScore[]
+  invitesReferrer      Invite[]     @relation("referrer")
+  invitesInvitee       Invite[]     @relation("invitee")
+  campaignsAdmin       Campaign[]   @relation("admin")
+  campaignsParticipants CampaignUser[]
+}
+
+// Define the Campaign model
+model Campaign {
+  id                          String       @id @default(uuid())
+  admin_id                    String
+  project_id                  String
+  created_at                  DateTime
+  start_date                  DateTime
+  end_date                    DateTime
+  name                        String
+  slug                        String
+  hashtag                     String
+  blockchain                  String
+  contract_address            String
+  owner_address               String
+  reward_amount               Int
+  published                   Boolean
+  is_eth                      Boolean
+  ticker                      String
+  decimals                    Int
+  logo                        String
+  is_fake                     Boolean
+  min_participation_amount    String
+  min_participation_contract  String
+  onchain_participation_condition Boolean
+  min_participation_contract_symbol String
+  min_participation_contract_decimals Int
+  points                      Json
+
+  // Define relationships
+  admin                       User         @relation("admin", fields: [admin_id], references: [id])
+  project                     Project      @relation(fields: [project_id], references: [id])
+  tweets                      Tweet[]
+  campaignTweets              CampaignTweet[]
+  users                       CampaignUser[]
+  userScores                  UserScore[]
+  campaignFollowAccounts      CampaignFollowAccount[]
+}
+
+// Define the Project model
+model Project {
+  id          String       @id @default(uuid())
+  slug        String
+  owner_id    String
+
+  // Define relationships
+  owner       User         @relation(fields: [owner_id], references: [id])
+  campaigns   Campaign[]
+}
+
+// Define the Tweet model
+model Tweet {
+  id              String       @id @default(uuid())
+  created_at      DateTime
+  retweet_count   Int
+  reply_count     Int
+  like_count      Int
+  quote_count     Int
+  bookmark_count  Int
+  impression_count Int
+  text            String
+  type            String
+  user_id         String
+  campaign_id     String
+  tweet_id        String
+  score           Int
+
+  // Define relationships
+  user            User         @relation(fields: [user_id], references: [id])
+  campaign        Campaign     @relation(fields: [campaign_id], references: [id])
+}
+
+// Define the CampaignTweet model
+model CampaignTweet {
+  id           String       @id @default(uuid())
+  campaign_id  String
+  url          String
+  points       Int
+
+  // Define relationships
+  campaign     Campaign     @relation(fields: [campaign_id], references: [id])
+}
+
+// Define the Wallet model
+model Wallet {
+  id           String       @id @default(uuid())
+  user_id      String
+  address      String      @unique
+  blockchain   String
+
+  // Define relationships
+  user         User        @relation(fields: [user_id], references: [id])
+  campaignUsers CampaignUser[]
+}
+
+// Define the UserScore model
+model UserScore {
+  id           String       @id @default(uuid())
+  created_at   DateTime
+  user_id      String
+  campaign_id  String
+  score        Int
+
+  // Define relationships
+  user         User         @relation(fields: [user_id], references: [id])
+  campaign     Campaign     @relation(fields: [campaign_id], references: [id])
+}
+
+// Define the Invite model
+model Invite {
+  id           String       @id @default(uuid())
+  referrer_id  String
+  invitee_id   String
+
+  // Define relationships
+  referrer     User         @relation("referrer", fields: [referrer_id], references: [id])
+  invitee      User         @relation("invitee", fields: [invitee_id], references: [id])
+}
+
+// Define the CampaignUser model
+model CampaignUser {
+  id                String       @id @default(uuid())
+  user_id           String
+  wallet_id         String
+  campaign_id       String
+  claimed_reward    Boolean
+  blacklisted       Boolean
+
+  // Define relationships
+  user              User         @relation(fields: [user_id], references: [id])
+  wallet            Wallet       @relation(fields: [wallet_id], references: [id])
+  campaign          Campaign     @relation(fields: [campaign_id], references: [id])
+}
+
+// Define the CampaignFollowAccount model
+model CampaignFollowAccount {
+  id           String       @id @default(uuid())
+  campaign_id  String
+  twitter_account String
+  points       Int
+
+  // Define relationships
+  campaign     Campaign     @relation(fields: [campaign_id], references: [id])
+}
