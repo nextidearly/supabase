@@ -17,9 +17,9 @@ datasource db {
 model User {
   id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email      String  @unique
-  user_name  String  @unique
-  avatar_url String  @unique
-  twitter_id String  @unique
+  user_name  String
+  avatar_url String
+  twitter_id String
   verified   Boolean
 
   // Define relationships
@@ -38,11 +38,11 @@ model Campaign {
   id                                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   admin_id                            String   @db.Uuid
   project_id                          String   @db.Uuid
-  created_at                          DateTime  @default(dbgenerated("now()"))
+  created_at                          DateTime @default(dbgenerated("now()"))
   start_date                          DateTime
   end_date                            DateTime
   name                                String
-  slug                                String  @unique
+  slug                                String   @unique
   keyword                             String
   reward_blockchain                   String
   reward_contract_address             String
@@ -73,7 +73,7 @@ model Campaign {
 model Project {
   id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name     String
-  slug     String @unique
+  slug     String
   owner_id String @db.Uuid
 
   // Define relationships
@@ -118,7 +118,7 @@ model CampaignRetweet {
 model Wallet {
   id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String @db.Uuid
-  address    String @unique
+  address    String
   blockchain String
 
   // Define relationships
