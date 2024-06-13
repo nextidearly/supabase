@@ -17,7 +17,7 @@ datasource db {
 model User {
   id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email      String  @unique
-  user_name  String
+  user_name  String  @unique
   avatar_url String  @unique
   twitter_id String  @unique
   verified   Boolean
@@ -38,25 +38,23 @@ model Campaign {
   id                                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   admin_id                            String   @db.Uuid
   project_id                          String   @db.Uuid
-  created_at                          DateTime @default(dbgenerated("now()"))
+  created_at                          DateTime  @default(dbgenerated("now()"))
   start_date                          DateTime
   end_date                            DateTime
   name                                String
-  slug                                String   @unique
-  hashtag                             String
-  blockchain                          String
-  contract_address                    String
-  owner_address                       String
+  slug                                String  @unique
+  keyword                             String
+  reward_blockchain                   String
+  reward_contract_address             String
   reward_amount                       Int
   published                           Boolean
-  is_eth                              Boolean
-  ticker                              String
-  decimals                            Int
-  logo                                String
-  is_fake                             Boolean
-  min_participation_amount            String
+  reward_ticker                       String
+  reward_decimals                     Int
+  logo_url                            String
+  cover_image_url                     String
+  min_participation_amount            Int
   min_participation_contract          String
-  onchain_participation_condition     Boolean
+  min_participation_condition         Boolean
   min_participation_contract_symbol   String
   min_participation_contract_decimals Int
   points                              Json
@@ -65,7 +63,7 @@ model Campaign {
   admin                  User                    @relation("admin", fields: [admin_id], references: [id])
   project                Project                 @relation(fields: [project_id], references: [id])
   tweets                 Tweet[]
-  campaignTweets         CampaignTweet[]
+  campaignRetweets       CampaignRetweet[]
   users                  CampaignUser[]
   userScores             UserScore[]
   campaignFollowAccounts CampaignFollowAccount[]
@@ -74,7 +72,8 @@ model Campaign {
 // Define the Project model
 model Project {
   id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug     String
+  name     String
+  slug     String @unique
   owner_id String @db.Uuid
 
   // Define relationships
@@ -104,8 +103,8 @@ model Tweet {
   campaign Campaign @relation(fields: [campaign_id], references: [id])
 }
 
-// Define the CampaignTweet model
-model CampaignTweet {
+// Define the CampaignRetweet model
+model CampaignRetweet {
   id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   campaign_id String @db.Uuid
   url         String
