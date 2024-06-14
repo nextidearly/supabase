@@ -176,9 +176,8 @@ model CampaignFollowAccount {
   campaign Campaign @relation(fields: [campaign_id], references: [id])
 }
 
-
 // Define the User model
 model Test {
-  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  test       String
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  test String
 }
