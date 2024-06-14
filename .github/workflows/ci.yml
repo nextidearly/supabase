@@ -121,9 +121,9 @@ jobs:
   dryrun:
     runs-on: ubuntu-latest
     env:
-      SUPABASE_ACCESS_TOKEN: sbp_dbb495a45daef6399137a6c02d1e73508d808daa
-      SUPABASE_DB_PASSWORD: p6FmVXNbYP5Sfwy1
-      SUPABASE_PROJECT_ID: rrsqtkgrmbtqntxcdaex
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ github.base_ref == 'main' && secrets.PRODUCTION_DB_PASSWORD || secrets.STAGING_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ github.base_ref == 'main' && secrets.PRODUCTION_PROJECT_ID || secrets.STAGING_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v4
