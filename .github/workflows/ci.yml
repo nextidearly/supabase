@@ -40,10 +40,6 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-       # Add a step to echo DATABASE_URL
-      - name: Log DATABASE_URL
-        run: echo "DATABASE_URL: ${{ secrets.DATABASE_URL }}"
-
       - name: Run migrations
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
