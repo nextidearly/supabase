@@ -147,11 +147,13 @@ model UserScores {
   user_id      String        @db.Uuid
   campaign_id  String        @db.Uuid
   score        Int
+  campaign_user_id String @db.Uuid
 
   // Define relationships
   user          Users          @relation(fields: [user_id], references: [id])
   campaign      Campaigns      @relation(fields: [campaign_id], references: [id])
   users_claims  UsersClaims[]  @relation("user_score_claims")
+  campaign_user CampaignUsers  @relation(fields: [campaign_user_id], references: [id])
 
   @@map("user_scores")
 }
@@ -182,6 +184,7 @@ model CampaignUsers {
   user      Users      @relation(fields: [user_id], references: [id])
   wallet    Wallets    @relation(fields: [wallet_id], references: [id])
   campaign  Campaigns  @relation(fields: [campaign_id], references: [id])
+  user_scores UserScores[]
 
   @@map("campaign_users")
 }
