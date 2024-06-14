@@ -63,10 +63,10 @@ jobs:
             exit 1
           fi
 
-  dryrun:
+  deploy:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ github.event.pull_request.base.ref == 'main' && secrets.PRODUCTION_DATABASE_URL || secrets.STAGING_DATABASE_URL }}
+      DATABASE_URL: ${{ github.event.pull_request.base.ref == 'main' && secrets.STAGING_DATABASE_URL || secrets.STAGING_DATABASE_URL }}
       PRISMA_CLIENT_ENGINE_TYPE: binary
 
     steps:
@@ -83,4 +83,4 @@ jobs:
       - name: Deploy database changes
         run: |
           npx prisma generate
-          npx prisma migrate deploy --preview-feature --dry-run
+          npx prisma migrate deploy --preview-feature
