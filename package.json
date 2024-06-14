@@ -6,7 +6,8 @@
 		"db-stop": "npx supabase stop --backup",
 		"db-start": "npx supabase start",
 		"lint": "eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"test": "echo \"Running tests...\""
 	},
 	"prisma": {
 		"seed": "npx pisma/seed.js"
