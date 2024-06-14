@@ -4,15 +4,23 @@
 	"scripts": {
 		"start": "nodemon index.js",
 		"db-stop": "npx supabase stop --backup",
-		"db-start": "npx supabase start"
+		"db-start": "npx supabase start",
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"test": "echo \"Running tests...\""
 	},
 	"prisma": {
-		"seed": "npx prisma/seed.ts"
+		"seed": "npx pisma/seed.js"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.2",
+		"eslint": "^9.4.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.3",
+		"prettier": "^3.3.2",
 		"prisma": "^5.15.0",
-		"supabase": "^1.176.4"
+		"supabase": "^1.176.4",
+		"ts-node": "^10.9.2"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.15.0",
