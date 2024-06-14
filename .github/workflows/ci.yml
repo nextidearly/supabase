@@ -3,8 +3,8 @@ name: CI/CD
 on:
   push:
     branches:
+      - main
       - staging
-      # - main
 
 jobs:
   test:
@@ -72,8 +72,8 @@ jobs:
           DATABASE_URL: ${{ secrets.STAGING_DB_URL }}
         run: npx prisma migrate deploy --preview-feature
 
-      # - name: Deploy to Production
-      #   if: github.ref == 'refs/heads/main'
-      #   env:
-      #     DATABASE_URL: ${{ secrets.PRODUCTION_DB_URL }}
-      #   run: npx prisma migrate deploy --preview-feature
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main'
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DB_URL }}
+        run: npx prisma migrate deploy --preview-feature
