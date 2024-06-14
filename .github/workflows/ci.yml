@@ -69,10 +69,8 @@ jobs:
           DATABASE_URL: ${{ secrets.STAGING_DB_URL }}
         run: |
           echo "------DATABASE_URL-----: $DATABASE_URL"
+          npx prisma generate
           npx prisma migrate deploy --preview-feature
-
-      - name: Generate Prisma client
-        run: npx prisma generate
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
@@ -80,4 +78,5 @@ jobs:
           DATABASE_URL: ${{ secrets.STAGING_DB_URL }}  # Change to PRODUCTION_DB_URL if needed
         run: |
           echo "DATABASE_URL: $DATABASE_URL"
+          npx prisma generate
           npx prisma migrate deploy --preview-feature
