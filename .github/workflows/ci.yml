@@ -43,9 +43,7 @@ jobs:
       - name: Run migrations
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
-        run: |
-          echo "-----------------------------------------------------------------------------DATABASE_URL----------------------------------------: $DATABASE_URL"
-          npx prisma migrate deploy --preview-feature
+        run: npx prisma migrate deploy --preview-feature
 
       - name: Run tests
         run: npm test
@@ -65,16 +63,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Generate Prisma client
-        run: npx prisma generate
-
       - name: Deploy to Staging
         if: github.ref == 'refs/heads/staging'
         env:
           DATABASE_URL: ${{ secrets.STAGING_DB_URL }}
         run: |
-          echo "DATABASE_URL: $DATABASE_URL"
+          echo "------DATABASE_URL-----: $DATABASE_URL"
           npx prisma migrate deploy --preview-feature
+
+      - name: Generate Prisma client
+        run: npx prisma generate
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
