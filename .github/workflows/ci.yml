@@ -3,8 +3,8 @@ name: CI/CD
 on:
   push:
     branches:
-      # - main
       - staging
+      # - main
 
 jobs:
   test:
@@ -32,7 +32,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20.14.0'
 
       - name: Install dependencies
         run: npm install
@@ -41,6 +41,8 @@ jobs:
         run: npx prisma generate
 
       - name: Run migrations
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
         run: npx prisma migrate deploy --preview-feature
 
       - name: Run tests
@@ -56,7 +58,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20.14.0'
 
       - name: Install dependencies
         run: npm install
@@ -66,10 +68,12 @@ jobs:
 
       - name: Deploy to Staging
         if: github.ref == 'refs/heads/staging'
-        run: |
-          DATABASE_URL=${{ secrets.STAGING_DB_URL }} npx prisma migrate deploy --preview-feature
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DB_URL }}
+        run: npx prisma migrate deploy --preview-feature
 
       # - name: Deploy to Production
       #   if: github.ref == 'refs/heads/main'
-      #   run: |
-      #     DATABASE_URL=${{ secrets.PRODUCTION_DB_URL }} npx prisma migrate deploy --preview-feature
+      #   env:
+      #     DATABASE_URL: ${{ secrets.PRODUCTION_DB_URL }}
+      #   run: npx prisma migrate deploy --preview-feature
