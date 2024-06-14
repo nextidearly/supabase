@@ -69,4 +69,4 @@ Alternatively, run migrations:
 npx prisma migrate dev --name initial_migration
 ```
 
-# Rise-Supabase
+# Rise-Supabase# supabase_prisma
