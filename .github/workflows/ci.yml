@@ -58,9 +58,9 @@ jobs:
           TABLES_COUNT=$(psql $DATABASE_URL -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';")
           if [ "$TABLES_COUNT" -gt 0 ]; then
             echo "Database is not empty. Creating baseline migration."
-            npx prisma migrate diff --from-schema-datasource --to-schema-datamodel --script > prisma/migrations/0000_init/migration.sql
-            CHECKSUM=$(md5sum prisma/migrations/0000_init/migration.sql | cut -d ' ' -f 1)
-            psql $DATABASE_URL -c "INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, applied_steps_count) VALUES ('0000_init', '$CHECKSUM', NOW(), '0000_init', '', NULL, 1);"
+            npx prisma migrate diff --from-schema-datasource --to-schema-datamodel --script > prisma/migrations/20240613052051_database_init/migration.sql
+            CHECKSUM=$(md5sum prisma/migrations/20240613052051_database_init/migration.sql | cut -d ' ' -f 1)
+            psql $DATABASE_URL -c "INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, applied_steps_count) VALUES ('20240613052051_database_init', '$CHECKSUM', NOW(), '20240613052051_database_init', '', NULL, 1);"
           else
             echo "Database is empty. Proceeding with migrations."
           fi
@@ -107,11 +107,11 @@ jobs:
           TABLES_COUNT=$(psql $DATABASE_URL -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';")
           if [ "$TABLES_COUNT" -gt 0 ]; then
             echo "Database is not empty. Ensuring baseline migration is set."
-            if [ "$(psql $DATABASE_URL -t -c "SELECT count(*) FROM _prisma_migrations WHERE migration_name = '0000_init';")" -eq 0 ]; then
+            if [ "$(psql $DATABASE_URL -t -c "SELECT count(*) FROM _prisma_migrations WHERE migration_name = '20240613052051_database_init';")" -eq 0 ]; then
               echo "Baseline migration not found, creating baseline migration."
-              npx prisma migrate diff --from-schema-datasource --to-schema-datamodel --script > prisma/migrations/0000_init/migration.sql
-              CHECKSUM=$(md5sum prisma/migrations/0000_init/migration.sql | cut -d ' ' -f 1)
-              psql $DATABASE_URL -c "INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, applied_steps_count) VALUES ('0000_init', '$CHECKSUM', NOW(), '0000_init', '', NULL, 1);"
+              npx prisma migrate diff --from-schema-datasource --to-schema-datamodel --script > prisma/migrations/20240613052051_database_init/migration.sql
+              CHECKSUM=$(md5sum prisma/migrations/20240613052051_database_init/migration.sql | cut -d ' ' -f 1)
+              psql $DATABASE_URL -c "INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, applied_steps_count) VALUES ('20240613052051_database_init', '$CHECKSUM', NOW(), '20240613052051_database_init', '', NULL, 1);"
             else
               echo "Baseline migration already applied."
             fi
