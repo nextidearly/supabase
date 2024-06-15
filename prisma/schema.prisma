@@ -21,7 +21,9 @@ model Users {
   avatar_url  String          @unique
   twitter_id  String          @unique
   verified    Boolean
-
+  side_score  Int
+  created_at  DateTime        @default(dbgenerated("now()"))
+  
   // Define relationships
   tweets                Tweets[]
   wallets               Wallets[]
