@@ -6,7 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - closed
   push:
     branches:
       - main
@@ -33,7 +32,8 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -42,6 +42,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Verify PostgreSQL is running
+        run: |
+          sudo apt-get install -y postgresql-client
+          pg_isready -h localhost -p 5432
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -65,12 +70,13 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: test
     env:
-      DATABASE_URL: ${{ github.event.pull_request.base.ref == 'main' && secrets.STAGING_DATABASE_URL || secrets.STAGING_DATABASE_URL }}
-      PRISMA_CLIENT_ENGINE_TYPE: binary
+      DATABASE_URL: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.PRODUCTION_DATABASE_URL || secrets.STAGING_DATABASE_URL }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -80,7 +86,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Deploy database changes
+      - name: Deploy to Staging
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy --preview-feature
+
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main'
         run: |
           npx prisma generate
           npx prisma migrate deploy --preview-feature
