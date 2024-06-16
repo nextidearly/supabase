@@ -5,15 +5,31 @@ const { getPagination } = require('../utils/pagination');
 
 const prisma = new PrismaClient();
 
-// Helper function to get 4 random elements from an array
+/**
+ * Helper function to get 4 random elements from an array
+ * @param {Array} array - The array to sample from
+ * @param {number} count - The number of elements to sample
+ * @returns {Array} - An array containing the sampled elements
+ */
 const getRandomElements = (array, count) => {
   const shuffled = array.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 };
 
-// [DASHBOARD] - Latest live campaigns component
-// Endpoint to get latest live campaigns with pagination and additional data
-// Example: /v1/campaigns/live?page=0&pageSize=10
+/**
+ * [DASHBOARD] - Route serving the latest live campaigns
+ * Example: /v1/campaigns/live?page=0&pageSize=10
+ *
+ * @name latestLiveCampaigns
+ * @route {GET} /v1/campaigns/live
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Request query parameters
+ * @param {number} req.query.page - Page number for pagination (optional)
+ * @param {number} req.query.pageSize - Number of items per page for pagination (optional)
+ * @param {Object} res - Express response object
+ * @returns {Array} 200 - An array of live campaigns with user details and random avatars
+ * @returns {Object} 500 - Error retrieving live campaigns
+ */
 router.get('/', async (req, res) => {
   const { page, pageSize } = req.query;
   const { limit, offset } = getPagination(page, pageSize);

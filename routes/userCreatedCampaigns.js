@@ -5,9 +5,22 @@ const { getPagination } = require('../utils/pagination');
 
 const prisma = new PrismaClient();
 
-// [DASHBOARD] - Campaigns you created component
-// Endpoint to get campaigns created by a user with pagination, user names, avatars, and computed scores per user
-// Example: /v1/user/:id/campaigns?page=0&pageSize=10
+/**
+ * [DASHBOARD] - Route serving campaigns created by a user
+ * Example: /v1/user/:id/campaigns?page=0&pageSize=10
+ *
+ * @name userCreatedCampaigns
+ * @route {GET} /v1/user/:id/campaigns
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Request parameters
+ * @param {string} req.params.id - The ID of the user
+ * @param {Object} req.query - Request query parameters
+ * @param {number} [req.query.page=0] - Page number for pagination (optional)
+ * @param {number} [req.query.pageSize=10] - Number of items per page for pagination (optional)
+ * @param {Object} res - Express response object
+ * @returns {Array<Object>} 200 - A list of campaigns with user details and computed scores
+ * @returns {Object} 500 - Error retrieving campaigns
+ */
 router.get('/', async (req, res) => {
   const userId = req.params.id;
   const { page, pageSize } = req.query;
@@ -47,6 +60,9 @@ router.get('/', async (req, res) => {
           blacklisted: campaignUser.blacklisted, // Include blacklisted status
         };
       });
+
+      // Sort users by totalUserScore in descending order
+      usersWithScores.sort((a, b) => b.totalUserScore - a.totalUserScore);
 
       return {
         id: campaign.id,

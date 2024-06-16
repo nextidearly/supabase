@@ -71,7 +71,7 @@ async function main() {
         reward_contract_address: faker.finance.ethereumAddress(),
         reward_amount: faker.number.int({ min: 1, max: 1000 }),
         published: faker.datatype.boolean(),
-        reward_ticker: faker.finance.currencyCode(),
+        reward_symbol: faker.finance.currencyCode(),
         reward_decimals: faker.number.int({ min: 1, max: 18 }),
         logo_url: faker.image.url(),
         cover_image_url: faker.image.url(),

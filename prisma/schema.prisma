@@ -53,7 +53,7 @@ model Campaigns {
   reward_contract_address             String
   reward_amount                       Int
   published                           Boolean
-  reward_ticker                       String
+  reward_symbol                       String
   reward_decimals                     Int
   logo_url                            String
   cover_image_url                     String
