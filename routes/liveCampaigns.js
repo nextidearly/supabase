@@ -36,10 +36,13 @@ router.get('/', async (req, res) => {
   const { limit, offset } = getPagination(page, pageSize);
 
   try {
+    const now = new Date().toISOString();
+
     const campaigns = await prisma.campaigns.findMany({
       where: {
         published: true,
-        end_date: { gt: new Date().toISOString() }, // Ensure UTC
+        start_date: { lte: now },
+        end_date: { gte: now },
       },
       orderBy: {
         start_date: 'desc',
@@ -63,13 +66,12 @@ router.get('/', async (req, res) => {
       const userAvatars = campaign.users.map((user) => user.user.avatar_url);
       const randomAvatars = getRandomElements(userAvatars, 4);
 
-      const { isLive, timeUntilEnd, timeSinceStart } = getLiveStatus(campaign);
+      const { timeUntilEnd, timeSinceStart } = getLiveStatus(campaign);
 
       return {
         ...campaign,
         userCount: campaign.users.length,
         userAvatars: randomAvatars,
-        isLive,
         timeUntilEnd,
         timeSinceStart,
       };
