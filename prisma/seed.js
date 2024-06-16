@@ -4,17 +4,17 @@ const { faker } = require('@faker-js/faker');
 const prisma = new PrismaClient();
 
 async function main() {
-  // await prisma.users.deleteMany(); // Clear existing data
-  // await prisma.campaigns.deleteMany();
-  // await prisma.projects.deleteMany();
-  // await prisma.wallets.deleteMany();
-  // await prisma.userScores.deleteMany();
-  // await prisma.invites.deleteMany();
-  // await prisma.campaignUsers.deleteMany();
-  // await prisma.campaignRetweets.deleteMany();
-  // await prisma.campaignFollowAccounts.deleteMany();
-  // await prisma.usersClaims.deleteMany();
-  // await prisma.tweets.deleteMany();
+  await prisma.tweets.deleteMany();
+  await prisma.usersClaims.deleteMany();
+  await prisma.campaignRetweets.deleteMany();
+  await prisma.userScores.deleteMany();
+  await prisma.campaignUsers.deleteMany();
+  await prisma.campaignFollowAccounts.deleteMany();
+  await prisma.campaigns.deleteMany();
+  await prisma.projects.deleteMany();
+  await prisma.wallets.deleteMany();
+  await prisma.invites.deleteMany();
+  await prisma.users.deleteMany();
 
   const users = [];
   const projects = [];
@@ -83,7 +83,26 @@ async function main() {
           min: 1,
           max: 18,
         }),
-        points: {},
+        points: {
+          tweet: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+          reply: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+          quote: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+        },
       },
     });
     campaigns.push(campaign);
