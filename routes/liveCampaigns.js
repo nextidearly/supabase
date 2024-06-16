@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const router = express.Router();
 const { getPagination } = require('../utils/pagination');
+const { getLiveStatus } = require('../utils/getLiveStatus');
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,10 @@ router.get('/', async (req, res) => {
 
   try {
     const campaigns = await prisma.campaigns.findMany({
-      where: { published: true, end_date: { gt: new Date() } },
+      where: {
+        published: true,
+        end_date: { gt: new Date().toISOString() }, // Ensure UTC
+      },
       orderBy: {
         start_date: 'desc',
       },
@@ -59,10 +63,14 @@ router.get('/', async (req, res) => {
       const userAvatars = campaign.users.map((user) => user.user.avatar_url);
       const randomAvatars = getRandomElements(userAvatars, 4);
 
+      const { isLive, daysUntilEnd } = getLiveStatus(campaign);
+
       return {
         ...campaign,
         userCount: campaign.users.length,
         userAvatars: randomAvatars,
+        isLive,
+        daysUntilEnd,
       };
     });
 

@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const router = express.Router();
 const { getPagination } = require('../utils/pagination');
+const { getLiveStatus } = require('../utils/getLiveStatus');
 
 const prisma = new PrismaClient();
 
@@ -64,11 +65,17 @@ router.get('/', async (req, res) => {
       // Sort users by totalUserScore in descending order
       usersWithScores.sort((a, b) => b.totalUserScore - a.totalUserScore);
 
+      const { isLive, daysUntilEnd } = getLiveStatus(campaign);
+
       return {
         id: campaign.id,
         name: campaign.name,
         start_date: campaign.start_date,
         end_date: campaign.end_date,
+        isLive,
+        rewardAmount: campaign.reward_amount,
+        rewardSymbol: campaign.reward_symbol,
+        daysUntilEnd,
         users: usersWithScores,
       };
     });

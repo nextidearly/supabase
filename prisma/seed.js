@@ -49,7 +49,7 @@ async function main() {
       data: {
         name: faker.company.name(),
         slug: faker.lorem.slug(),
-        owner_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+        admin_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
       },
     });
     projects.push(project);
@@ -62,8 +62,8 @@ async function main() {
         admin_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
         project_id:
           projects[faker.number.int({ min: 0, max: projects.length - 1 })].id,
-        start_date: faker.date.future(),
-        end_date: faker.date.future(),
+        start_date: new Date().toISOString(),
+        end_date: faker.date.future().toISOString(),
         name: faker.commerce.productName(),
         slug: faker.lorem.slug(),
         keyword: faker.lorem.word(),
@@ -71,6 +71,7 @@ async function main() {
         reward_contract_address: faker.finance.ethereumAddress(),
         reward_amount: faker.number.int({ min: 1, max: 1000 }),
         published: faker.datatype.boolean(),
+        promoted: faker.datatype.boolean(),
         reward_symbol: faker.finance.currencyCode(),
         reward_decimals: faker.number.int({ min: 1, max: 18 }),
         logo_url: faker.image.url(),

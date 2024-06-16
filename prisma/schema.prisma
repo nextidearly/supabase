@@ -63,6 +63,7 @@ model Campaigns {
   min_participation_contract_symbol   String
   min_participation_contract_decimals Int
   points                              Json
+  promoted                            Boolean   @default(false)
 
   // Define relationships
   admin                  Users                   @relation("admin", fields: [admin_id], references: [id])
@@ -82,10 +83,10 @@ model Projects {
   id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   slug      String       @unique
-  owner_id  String       @db.Uuid
+  admin_id  String       @db.Uuid
 
   // Define relationships
-  owner      Users        @relation(fields: [owner_id], references: [id])
+  admin      Users        @relation(fields: [admin_id], references: [id])
   campaigns  Campaigns[]
 
   @@map("projects")
