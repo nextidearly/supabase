@@ -72,50 +72,26 @@ router.get('/', async (req, res) => {
         const userPoints = userScoreEntry ? userScoreEntry.score : 0;
 
         // Fetch user scores for today and yesterday
-        const todayStart = new Date(
-          Date.UTC(
-            today.getUTCFullYear(),
-            today.getUTCMonth(),
-            today.getUTCDate(),
-            0,
-            0,
-            0,
-            0,
-          ),
-        );
-        const todayEnd = new Date(
-          Date.UTC(
-            today.getUTCFullYear(),
-            today.getUTCMonth(),
-            today.getUTCDate(),
-            23,
-            59,
-            59,
-            999,
-          ),
-        );
+        const todayStart = new Date();
+        const todayEnd = new Date();
 
         const yesterdayStart = new Date(
-          Date.UTC(
-            yesterday.getUTCFullYear(),
-            yesterday.getUTCMonth(),
-            yesterday.getUTCDate(),
-            0,
-            0,
-            0,
-            0,
-          ),
+          yesterday.getUTCFullYear(),
+          yesterday.getUTCMonth(),
+          yesterday.getUTCDate(),
+          0,
+          0,
+          0,
+          0,
         );
         const yesterdayEnd = new Date(
-          Date.UTC(
-            yesterday.getUTCFullYear(),
-            yesterday.getUTCMonth(),
-            yesterday.getUTCDate(),
-            23,
-            59,
-            59,
-            999,
-          ),
+          yesterday.getUTCFullYear(),
+          yesterday.getUTCMonth(),
+          yesterday.getUTCDate(),
+          23,
+          59,
+          59,
+          999,
         );
 
         const todayScores = await prisma.userScores.findMany({
@@ -159,8 +135,14 @@ router.get('/', async (req, res) => {
               : 0;
 
         // Get live status and calculate days since start and days until end
-        const { isLive, daysUntilEnd, daysSinceStart } =
-          getLiveStatus(campaign);
+        const {
+          isLive,
+          startsInFuture,
+          isFinished,
+          timeUntilEnd,
+          timeSinceStart,
+          timeUntilStart,
+        } = getLiveStatus(campaign);
 
         return {
           id: campaign.id,
@@ -172,8 +154,11 @@ router.get('/', async (req, res) => {
           pointsDifference: pointsDifference,
           pointsPercentageIncrease: pointsPercentageIncrease,
           isLive,
-          daysSinceStart,
-          daysUntilEnd,
+          startsInFuture,
+          isFinished,
+          timeUntilEnd,
+          timeSinceStart,
+          timeUntilStart,
         };
       }),
     );

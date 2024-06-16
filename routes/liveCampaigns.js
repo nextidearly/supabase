@@ -63,14 +63,15 @@ router.get('/', async (req, res) => {
       const userAvatars = campaign.users.map((user) => user.user.avatar_url);
       const randomAvatars = getRandomElements(userAvatars, 4);
 
-      const { isLive, daysUntilEnd } = getLiveStatus(campaign);
+      const { isLive, timeUntilEnd, timeSinceStart } = getLiveStatus(campaign);
 
       return {
         ...campaign,
         userCount: campaign.users.length,
         userAvatars: randomAvatars,
         isLive,
-        daysUntilEnd,
+        timeUntilEnd,
+        timeSinceStart,
       };
     });
 

@@ -65,18 +65,29 @@ router.get('/', async (req, res) => {
       // Sort users by totalUserScore in descending order
       usersWithScores.sort((a, b) => b.totalUserScore - a.totalUserScore);
 
-      const { isLive, daysUntilEnd } = getLiveStatus(campaign);
+      const {
+        isLive,
+        startsInFuture,
+        isFinished,
+        timeUntilEnd,
+        timeSinceStart,
+        timeUntilStart,
+      } = getLiveStatus(campaign);
 
       return {
         id: campaign.id,
         name: campaign.name,
         start_date: campaign.start_date,
         end_date: campaign.end_date,
-        isLive,
         rewardAmount: campaign.reward_amount,
         rewardSymbol: campaign.reward_symbol,
-        daysUntilEnd,
         users: usersWithScores,
+        isLive,
+        startsInFuture,
+        isFinished,
+        timeUntilEnd,
+        timeSinceStart,
+        timeUntilStart,
       };
     });
 
