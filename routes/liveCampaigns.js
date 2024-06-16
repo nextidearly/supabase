@@ -14,7 +14,7 @@ const getRandomElements = (array, count) => {
 // [DASHBOARD] - Latest live campaigns component
 // Endpoint to get latest live campaigns with pagination and additional data
 // Example: /v1/campaigns/live?page=0&pageSize=10
-router.get('/campaigns/live', async (req, res) => {
+router.get('/', async (req, res) => {
   const { page, pageSize } = req.query;
   const { limit, offset } = getPagination(page, pageSize);
 

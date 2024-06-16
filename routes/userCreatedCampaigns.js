@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // [DASHBOARD] - Campaigns you created component
 // Endpoint to get campaigns created by a user with pagination, user names, avatars, and computed scores per user
 // Example: /v1/user/:id/campaigns?page=0&pageSize=10
-router.get('/user/:id/campaigns', async (req, res) => {
+router.get('/', async (req, res) => {
   const userId = req.params.id;
   const { page, pageSize } = req.query;
   const { limit, offset } = getPagination(page, pageSize);
