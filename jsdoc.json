@@ -1,0 +1,14 @@
+{
+  "source": {
+    "include": ["routes", "utils"],
+    "exclude": ["node_modules"]
+  },
+  "opts": {
+    "destination": "./docs"
+  },
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true
+  }
+}
