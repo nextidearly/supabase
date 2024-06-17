@@ -125,7 +125,6 @@ async function main() {
         campaign_id:
           campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
         tweet_id: faker.string.uuid(),
-        score: faker.number.int({ min: 0, max: 100 }),
       },
     });
     tweets.push(tweet);
@@ -171,6 +170,8 @@ async function main() {
           campaignUsers[
             faker.number.int({ min: 0, max: campaignUsers.length - 1 })
           ].id,
+        tweet_id:
+          tweets[faker.number.int({ min: 0, max: tweets.length - 1 })].id, // Add this line to link to Tweets
       },
     });
     userScores.push(userScore);

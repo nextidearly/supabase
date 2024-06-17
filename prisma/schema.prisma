@@ -107,11 +107,11 @@ model Tweets {
   user_id           String    @db.Uuid
   campaign_id       String    @db.Uuid
   tweet_id          String
-  score             Int
 
   // Define relationships
   user      Users      @relation(fields: [user_id], references: [id])
   campaign  Campaigns  @relation(fields: [campaign_id], references: [id])
+  user_scores UserScores[]
 
   @@map("tweets")
 }
@@ -150,11 +150,13 @@ model UserScores {
   user_id      String        @db.Uuid
   campaign_id  String        @db.Uuid
   score        Int
-  campaign_user_id String @db.Uuid
+  campaign_user_id String    @db.Uuid
+  tweet_id     String?       @db.Uuid
 
   // Define relationships
   user          Users          @relation(fields: [user_id], references: [id])
   campaign      Campaigns      @relation(fields: [campaign_id], references: [id])
+  tweet         Tweets?        @relation(fields: [tweet_id], references: [id])
   users_claims  UsersClaims[]  @relation("user_score_claims")
   campaign_user CampaignUsers  @relation(fields: [campaign_user_id], references: [id])
 

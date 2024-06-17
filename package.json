@@ -5,9 +5,10 @@
     "start": "nodemon index.js",
     "db-stop": "npx supabase stop --backup",
     "db-start": "npx supabase start",
-    "lint": "eslint .",
-    "format": "prettier --write .",
     "doc": "jsdoc -c jsdoc.json",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "seed": "node prisma/seed.js",
     "test": "jest"
   },
   "prisma": {

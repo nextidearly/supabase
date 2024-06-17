@@ -67,7 +67,6 @@ CREATE TABLE "tweets" (
     "user_id" UUID NOT NULL,
     "campaign_id" UUID NOT NULL,
     "tweet_id" TEXT NOT NULL,
-    "score" INTEGER NOT NULL,
 
     CONSTRAINT "tweets_pkey" PRIMARY KEY ("id")
 );
@@ -100,6 +99,7 @@ CREATE TABLE "user_scores" (
     "campaign_id" UUID NOT NULL,
     "score" INTEGER NOT NULL,
     "campaign_user_id" UUID NOT NULL,
+    "tweet_id" UUID,
 
     CONSTRAINT "user_scores_pkey" PRIMARY KEY ("id")
 );
@@ -194,6 +194,9 @@ ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_user_id_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_tweet_id_fkey" FOREIGN KEY ("tweet_id") REFERENCES "tweets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_campaign_user_id_fkey" FOREIGN KEY ("campaign_user_id") REFERENCES "campaign_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
