@@ -187,3 +187,14 @@ model UsersClaims {
 
   @@map("users_claims")
 }
+
+// Define the User model
+model Test {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  test String
+}
+
+model Test2 {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  test String
+}
