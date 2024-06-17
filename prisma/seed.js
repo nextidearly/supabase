@@ -1,313 +1,269 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
+const { faker } = require('@faker-js/faker');
 
 const prisma = new PrismaClient();
 
 async function main() {
-    // Sample data for User model
-    const users = await prisma.user.createMany({
-        data: [
-            {
-                email: 'user1@example.com',
-                user_name: 'user1',
-                avatar_url: 'https://example.com/avatar1.png',
-                twitter_id: '123456789', // Replace with actual IDs
-                verified: true,
-            },
-            {
-                email: 'user2@example.com',
-                user_name: 'user2',
-                avatar_url: 'https://example.com/avatar2.png',
-                twitter_id: '987654321',
-                verified: false,
-            },
-            {
-                email: 'user3@example.com',
-                user_name: 'user3',
-                avatar_url: 'https://example.com/avatar3.png',
-                twitter_id: '456789123',
-                verified: true,
-            },
-        ],
+  await prisma.tweets.deleteMany();
+  await prisma.usersClaims.deleteMany();
+  await prisma.campaignRetweets.deleteMany();
+  await prisma.userScores.deleteMany();
+  await prisma.campaignUsers.deleteMany();
+  await prisma.campaignFollowAccounts.deleteMany();
+  await prisma.campaigns.deleteMany();
+  await prisma.projects.deleteMany();
+  await prisma.wallets.deleteMany();
+  await prisma.invites.deleteMany();
+  await prisma.users.deleteMany();
+
+  const users = [];
+  const projects = [];
+  const campaigns = [];
+  const tweets = [];
+  const wallets = [];
+  const userScores = [];
+  const invites = [];
+  const campaignUsers = [];
+  const campaignRetweets = [];
+  const campaignFollowAccounts = [];
+  const usersClaims = [];
+
+  // Create Users
+  for (let i = 0; i < 10; i++) {
+    const user = await prisma.users.create({
+      data: {
+        email: faker.internet.email(),
+        user_name: faker.internet.userName(),
+        avatar_url: faker.image.avatar(),
+        twitter_id: faker.string.uuid(),
+        verified: faker.datatype.boolean(),
+        side_score: faker.number.int({ min: 0, max: 100 }),
+      },
     });
+    users.push(user);
+  }
 
-    // Fetch created users to use their IDs
-    const createdUsers = await prisma.user.findMany();
-
-    // Sample data for Project model
-    const projects = await prisma.project.createMany({
-        data: [
-            {
-                name: 'Project 1',
-                slug: 'project1',
-                owner_id: createdUsers[0].id,
-            },
-            {
-                name: 'Project 2',
-                slug: 'project2',
-                owner_id: createdUsers[1].id,
-            },
-            {
-                name: 'Project 3',
-                slug: 'project3',
-                owner_id: createdUsers[2].id,
-            },
-        ],
+  // Create Projects
+  for (let i = 0; i < 5; i++) {
+    const project = await prisma.projects.create({
+      data: {
+        name: faker.company.name(),
+        slug: faker.lorem.slug(),
+        admin_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+      },
     });
+    projects.push(project);
+  }
 
-    // Fetch created projects to use their IDs
-    const createdProjects = await prisma.project.findMany();
-
-    // Sample data for Campaign model
-    const campaigns = await prisma.campaign.createMany({
-        data: [
-            {
-                admin_id: createdUsers[0].id,
-                project_id: createdProjects[0].id,
-                start_date: new Date(),
-                end_date: new Date(),
-                name: 'Campaign 1',
-                slug: 'campaign-1',
-                keyword: 'Keyword1',
-                reward_blockchain: 'Ethereum',
-                reward_contract_address: '0x123456789abcdef',
-                reward_amount: 100,
-                published: true,
-                reward_ticker: 'ETH',
-                reward_decimals: 18,
-                logo_url: 'https://example.com/logo1.png',
-                cover_image_url: 'https://example.com/cover1.png',
-                min_participation_amount: 10,
-                min_participation_contract: '0xcontract123',
-                min_participation_condition: true,
-                min_participation_contract_symbol: 'ERC20',
-                min_participation_contract_decimals: 18,
-                points: { points1: 10, points2: 20 },
-            },
-            {
-                admin_id: createdUsers[1].id,
-                project_id: createdProjects[1].id,
-                start_date: new Date(),
-                end_date: new Date(),
-                name: 'Campaign 2',
-                slug: 'campaign-2',
-                keyword: 'Keyword2',
-                reward_blockchain: 'Polygon',
-                reward_contract_address: '0xabcdef123456789',
-                reward_amount: 50,
-                published: true,
-                reward_ticker: 'MATIC',
-                reward_decimals: 18,
-                logo_url: 'https://example.com/logo2.png',
-                cover_image_url: 'https://example.com/cover1.png',
-                min_participation_amount: 100,
-                min_participation_contract: '0xcontract456',
-                min_participation_condition: false,
-                min_participation_contract_symbol: 'ERC721',
-                min_participation_contract_decimals: 0,
-                points: { points1: 15, points2: 25 },
-            },
-            {
-                admin_id: createdUsers[2].id,
-                project_id: createdProjects[2].id,
-                start_date: new Date(),
-                end_date: new Date(),
-                name: 'Campaign 3',
-                slug: 'campaign-3',
-                keyword: 'Keyword3',
-                reward_blockchain: 'Binance Smart Chain',
-                reward_contract_address: '0x6789abcdef123456',
-                reward_amount: 75,
-                published: false,
-                reward_ticker: 'BNB',
-                reward_decimals: 18,
-                logo_url: 'https://example.com/logo3.png',
-                cover_image_url: 'https://example.com/cover1.png',
-                min_participation_amount: 1,
-                min_participation_contract: '0xcontract789',
-                min_participation_condition: true,
-                min_participation_contract_symbol: 'BEP20',
-                min_participation_contract_decimals: 18,
-                points: { points1: 5, points2: 10 },
-            },
-        ],
+  // Create Campaigns
+  for (let i = 0; i < 5; i++) {
+    const campaign = await prisma.campaigns.create({
+      data: {
+        admin_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+        project_id:
+          projects[faker.number.int({ min: 0, max: projects.length - 1 })].id,
+        start_date: new Date().toISOString(),
+        end_date: faker.date.future().toISOString(),
+        name: faker.commerce.productName(),
+        slug: faker.lorem.slug(),
+        keyword: faker.lorem.word(),
+        reward_blockchain: faker.lorem.word(),
+        reward_contract_address: faker.finance.ethereumAddress(),
+        reward_amount: faker.number.int({ min: 1, max: 1000 }),
+        published: faker.datatype.boolean(),
+        promoted: faker.datatype.boolean(),
+        reward_symbol: faker.finance.currencyCode(),
+        reward_decimals: faker.number.int({ min: 1, max: 18 }),
+        logo_url: faker.image.url(),
+        cover_image_url: faker.image.url(),
+        min_participation_amount: faker.number.int({ min: 1, max: 100 }),
+        min_participation_contract: faker.finance.ethereumAddress(),
+        min_participation_condition: faker.datatype.boolean(),
+        min_participation_contract_symbol: faker.finance.currencyCode(),
+        min_participation_contract_decimals: faker.number.int({
+          min: 1,
+          max: 18,
+        }),
+        points: {
+          tweet: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+          reply: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+          quote: {
+            views: 10,
+            likes: 10,
+            comments: 10,
+            retweet: 10,
+          },
+        },
+      },
     });
+    campaigns.push(campaign);
+  }
 
-    // Fetch created campaigns to use their IDs
-    const createdCampaigns = await prisma.campaign.findMany();
-
-    // Sample data for Tweet model
-    const tweets = await prisma.tweet.createMany({
-        data: [
-            {
-                created_at: new Date(),
-                retweet_count: 10,
-                reply_count: 5,
-                like_count: 20,
-                quote_count: 3,
-                bookmark_count: 7,
-                impression_count: 30,
-                text: 'This is tweet 1',
-                type: 'original',
-                user_id: createdUsers[0].id,
-                campaign_id: createdCampaigns[0].id,
-                tweet_id: 'tweet1',
-                score: 100,
-            },
-            {
-                created_at: new Date(),
-                retweet_count: 15,
-                reply_count: 8,
-                like_count: 25,
-                quote_count: 4,
-                bookmark_count: 9,
-                impression_count: 35,
-                text: 'This is tweet 2',
-                type: 'retweet',
-                user_id: createdUsers[1].id,
-                campaign_id: createdCampaigns[1].id,
-                tweet_id: 'tweet2',
-                score: 150,
-            },
-            {
-                created_at: new Date(),
-                retweet_count: 12,
-                reply_count: 6,
-                like_count: 22,
-                quote_count: 2,
-                bookmark_count: 8,
-                impression_count: 32,
-                text: 'This is tweet 3',
-                type: 'original',
-                user_id: createdUsers[2].id,
-                campaign_id: createdCampaigns[2].id,
-                tweet_id: 'tweet3',
-                score: 120,
-            },
-        ],
+  // Create Wallets
+  for (let i = 0; i < 10; i++) {
+    const wallet = await prisma.wallets.create({
+      data: {
+        user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+        address: faker.finance.ethereumAddress(),
+        blockchain: faker.lorem.word(),
+      },
     });
+    wallets.push(wallet);
+  }
 
-    // Sample data for CampaignRetweet model
-    const campaignRetweets = await prisma.campaignRetweet.createMany({
+  // Create CampaignUsers
+  for (const user of users) {
+    for (const campaign of campaigns) {
+      const wallet = wallets.find((w) => w.user_id === user.id);
+
+      if (wallet) {
+        const campaignUser = await prisma.campaignUsers.create({
+          data: {
+            user_id: user.id,
+            campaign_id: campaign.id,
+            claimed_reward: faker.datatype.boolean(),
+            blacklisted: faker.datatype.boolean(),
+          },
+        });
+        campaignUsers.push(campaignUser);
+      }
+    }
+  }
+
+  // Create Tweets with UserScores
+  for (let i = 0; i < 20; i++) {
+    const userId =
+      users[faker.number.int({ min: 0, max: users.length - 1 })].id;
+    const campaignId =
+      campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id;
+
+    const campaignUser = campaignUsers.find(
+      (cu) => cu.user_id === userId && cu.campaign_id === campaignId,
+    );
+    console.log('campainguser', campaignUser);
+    if (campaignUser) {
+      const tweet = await prisma.tweets.create({
+        data: {
+          retweet_count: faker.number.int({ min: 0, max: 100 }),
+          reply_count: faker.number.int({ min: 0, max: 100 }),
+          like_count: faker.number.int({ min: 0, max: 100 }),
+          quote_count: faker.number.int({ min: 0, max: 100 }),
+          bookmark_count: faker.number.int({ min: 0, max: 100 }),
+          impression_count: faker.number.int({ min: 0, max: 100 }),
+          text: faker.lorem.sentence(),
+          type: faker.lorem.word(),
+          user_id: userId,
+          campaign_id: campaignId,
+          tweet_id: faker.string.uuid(),
+        },
+      });
+
+      const tweetId = tweet.id;
+
+      const userScoresCreated = await prisma.userScores.createMany({
+        // user score should be polymorphic with a resource_id and resource_type field
         data: [
-            {
-                campaign_id: createdCampaigns[0].id,
-                url: 'https://twitter.com/campaign1/tweet1',
-                points: 50,
-            },
-            {
-                campaign_id: createdCampaigns[1].id,
-                url: 'https://twitter.com/campaign2/tweet2',
-                points: 40,
-            },
-            {
-                campaign_id: createdCampaigns[2].id,
-                url: 'https://twitter.com/campaign3/tweet3',
-                points: 60,
-            },
+          {
+            user_id: userId,
+            campaign_id: campaignId,
+            score: faker.number.int({ min: 0, max: 100 }),
+            campaign_user_id: campaignUser.id,
+            tweet_id: tweetId,
+            // resource_id: tweetId,
+            // resource_type: 'tweets',
+          },
+          {
+            user_id: userId,
+            campaign_id: campaignId,
+            score: faker.number.int({ min: 0, max: 100 }),
+            campaign_user_id: campaignUser.id,
+            // resource_id: tweetId,
+            // resource_type: 'tweets',
+          },
         ],
+      });
+
+      // push userScoresCreated to userScores array
+
+      userScores.push(userScoresCreated);
+      console.log(userScores);
+      tweets.push(tweet);
+    }
+  }
+
+  // Create Invites
+  for (let i = 0; i < 5; i++) {
+    const invite = await prisma.invites.create({
+      data: {
+        referrer_id:
+          users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+        invitee_id:
+          users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+      },
     });
+    invites.push(invite);
+  }
 
-    // Sample data for Wallet model
-    const wallets = await prisma.wallet.createMany({
-        data: [
-            {
-                user_id: createdUsers[0].id,
-                address: '0xwallet1',
-                blockchain: 'Ethereum',
-            },
-            {
-                user_id: createdUsers[1].id,
-                address: '0xwallet2',
-                blockchain: 'Polygon',
-            },
-            {
-                user_id: createdUsers[2].id,
-                address: '0xwallet3',
-                blockchain: 'Binance Smart Chain',
-            },
-        ],
+  // Create CampaignRetweets
+  for (let i = 0; i < 10; i++) {
+    const campaignRetweet = await prisma.campaignRetweets.create({
+      data: {
+        campaign_id:
+          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
+        url: faker.internet.url(),
+        points: faker.number.int({ min: 0, max: 100 }),
+      },
     });
+    campaignRetweets.push(campaignRetweet);
+  }
 
-    // Fetch created wallets to use their IDs
-    const createdWallets = await prisma.wallet.findMany();
-
-    // Sample data for UserScore model
-    const userScores = await prisma.userScore.createMany({
-        data: [
-            {
-                created_at: new Date(),
-                user_id: createdUsers[0].id,
-                campaign_id: createdCampaigns[0].id,
-                score: 200,
-            },
-            {
-                created_at: new Date(),
-                user_id: createdUsers[1].id,
-                campaign_id: createdCampaigns[1].id,
-                score: 180,
-            },
-            {
-                created_at: new Date(),
-                user_id: createdUsers[2].id,
-                campaign_id: createdCampaigns[2].id,
-                score: 220,
-            },
-        ],
+  // Create CampaignFollowAccounts
+  for (let i = 0; i < 5; i++) {
+    const campaignFollowAccount = await prisma.campaignFollowAccounts.create({
+      data: {
+        campaign_id:
+          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
+        twitter_account: faker.internet.userName(),
+        points: faker.number.int({ min: 0, max: 100 }),
+      },
     });
+    campaignFollowAccounts.push(campaignFollowAccount);
+  }
 
-    // Sample data for Invite model
-    const invites = await prisma.invite.createMany({
-        data: [
-            {
-                referrer_id: createdUsers[0].id,
-                invitee_id: createdUsers[1].id,
-            },
-            {
-                referrer_id: createdUsers[1].id,
-                invitee_id: createdUsers[2].id,
-            },
-            {
-                referrer_id: createdUsers[2].id,
-                invitee_id: createdUsers[0].id,
-            },
-        ],
-    });
+  //   // Create UsersClaims
+  //   for (let i = 0; i < 10; i++) {
+  //     const usersClaim = await prisma.usersClaims.create({
+  //       data: {
+  //         user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+  //         campaign_id:
+  //           campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
+  //         user_score_id:
+  //           userScores[faker.number.int({ min: 0, max: userScores.length - 1 })]
+  //             .id,
+  //         amount: faker.number.int({ min: 0, max: 1000 }),
+  //       },
+  //     });
+  //     usersClaims.push(usersClaim);
+  //   }
 
-    // Sample data for CampaignUser model
-    const campaignUsers = await prisma.campaignUser.createMany({
-        data: [
-            {
-                user_id: createdUsers[0].id,
-                wallet_id: createdWallets[0].id,
-                campaign_id: createdCampaigns[0].id,
-                claimed_reward: true,
-                blacklisted: false,
-            },
-            {
-                user_id: createdUsers[1].id,
-                wallet_id: createdWallets[1].id,
-                campaign_id: createdCampaigns[1].id,
-                claimed_reward: false,
-                blacklisted: false,
-            },
-            {
-                user_id: createdUsers[2].id,
-                wallet_id: createdWallets[2].id,
-                campaign_id: createdCampaigns[2].id,
-                claimed_reward: true,
-                blacklisted: false,
-            },
-        ],
-    });
-
-    console.log('Seed data has been created');
+  console.log('Seed data created successfully!');
 }
 
 main()
-    .catch((e) => {
-        console.error(e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

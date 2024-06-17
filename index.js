@@ -1,26 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+require('dotenv').config();
 
-dotenv.config();
+const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const corsOptions = {
-	origin: '*',
-};
-
-app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-	console.error(err.stack);
-	res.status(500).json({message: 'Something went wrong!'});
-});
+const v1Router = require('./routes/v1Router');
+
+app.use('/v1', v1Router);
 
 // Start the server
 app.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
+  // Always returns the date and time in ISO 8601 format (UTC)
+  console.log('Current server time (UTC):', new Date().toISOString());
 });
