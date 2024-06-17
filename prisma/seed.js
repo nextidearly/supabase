@@ -109,27 +109,6 @@ async function main() {
     campaigns.push(campaign);
   }
 
-  // Create Tweets
-  for (let i = 0; i < 20; i++) {
-    const tweet = await prisma.tweets.create({
-      data: {
-        retweet_count: faker.number.int({ min: 0, max: 100 }),
-        reply_count: faker.number.int({ min: 0, max: 100 }),
-        like_count: faker.number.int({ min: 0, max: 100 }),
-        quote_count: faker.number.int({ min: 0, max: 100 }),
-        bookmark_count: faker.number.int({ min: 0, max: 100 }),
-        impression_count: faker.number.int({ min: 0, max: 100 }),
-        text: faker.lorem.sentence(),
-        type: faker.lorem.word(),
-        user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
-        campaign_id:
-          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
-        tweet_id: faker.string.uuid(),
-      },
-    });
-    tweets.push(tweet);
-  }
-
   // Create Wallets
   for (let i = 0; i < 10; i++) {
     const wallet = await prisma.wallets.create({
@@ -143,38 +122,83 @@ async function main() {
   }
 
   // Create CampaignUsers
-  for (let i = 0; i < 10; i++) {
-    const campaignUser = await prisma.campaignUsers.create({
-      data: {
-        user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
-        wallet_id:
-          wallets[faker.number.int({ min: 0, max: wallets.length - 1 })].id,
-        campaign_id:
-          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
-        claimed_reward: faker.datatype.boolean(),
-        blacklisted: faker.datatype.boolean(),
-      },
-    });
-    campaignUsers.push(campaignUser);
+  for (const user of users) {
+    for (const campaign of campaigns) {
+      const wallet = wallets.find((w) => w.user_id === user.id);
+
+      if (wallet) {
+        const campaignUser = await prisma.campaignUsers.create({
+          data: {
+            user_id: user.id,
+            campaign_id: campaign.id,
+            claimed_reward: faker.datatype.boolean(),
+            blacklisted: faker.datatype.boolean(),
+          },
+        });
+        campaignUsers.push(campaignUser);
+      }
+    }
   }
 
-  // Create UserScores
-  for (let i = 0; i < 10; i++) {
-    const userScore = await prisma.userScores.create({
-      data: {
-        user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
-        campaign_id:
-          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
-        score: faker.number.int({ min: 0, max: 100 }),
-        campaign_user_id:
-          campaignUsers[
-            faker.number.int({ min: 0, max: campaignUsers.length - 1 })
-          ].id,
-        tweet_id:
-          tweets[faker.number.int({ min: 0, max: tweets.length - 1 })].id, // Add this line to link to Tweets
-      },
-    });
-    userScores.push(userScore);
+  // Create Tweets with UserScores
+  for (let i = 0; i < 20; i++) {
+    const userId =
+      users[faker.number.int({ min: 0, max: users.length - 1 })].id;
+    const campaignId =
+      campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id;
+
+    const campaignUser = campaignUsers.find(
+      (cu) => cu.user_id === userId && cu.campaign_id === campaignId,
+    );
+    console.log('campainguser', campaignUser);
+    if (campaignUser) {
+      const tweet = await prisma.tweets.create({
+        data: {
+          retweet_count: faker.number.int({ min: 0, max: 100 }),
+          reply_count: faker.number.int({ min: 0, max: 100 }),
+          like_count: faker.number.int({ min: 0, max: 100 }),
+          quote_count: faker.number.int({ min: 0, max: 100 }),
+          bookmark_count: faker.number.int({ min: 0, max: 100 }),
+          impression_count: faker.number.int({ min: 0, max: 100 }),
+          text: faker.lorem.sentence(),
+          type: faker.lorem.word(),
+          user_id: userId,
+          campaign_id: campaignId,
+          tweet_id: faker.string.uuid(),
+        },
+      });
+
+      const tweetId = tweet.id;
+
+      const userScoresCreated = await prisma.userScores.createMany({
+        // user score should be polymorphic with a resource_id and resource_type field
+        data: [
+          {
+            user_id: userId,
+            campaign_id: campaignId,
+            score: faker.number.int({ min: 0, max: 100 }),
+            campaign_user_id: campaignUser.id,
+            tweet_id: tweetId,
+            // resource_id: tweetId,
+            // resource_type: 'tweets',
+          },
+          {
+            user_id: userId,
+            campaign_id: campaignId,
+            score: faker.number.int({ min: 0, max: 100 }),
+            campaign_user_id: campaignUser.id,
+            // resource_id: tweetId,
+            // resource_type: 'tweets',
+          },
+        ],
+      });
+
+      // push userScoresCreated to userScores array
+
+      userScores.push(userScoresCreated);
+      console.log(userScores);
+      tweets.push(tweet);
+    }
   }
 
   // Create Invites
@@ -216,21 +240,21 @@ async function main() {
     campaignFollowAccounts.push(campaignFollowAccount);
   }
 
-  // Create UsersClaims
-  for (let i = 0; i < 10; i++) {
-    const usersClaim = await prisma.usersClaims.create({
-      data: {
-        user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
-        campaign_id:
-          campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
-        user_score_id:
-          userScores[faker.number.int({ min: 0, max: userScores.length - 1 })]
-            .id,
-        amount: faker.number.int({ min: 0, max: 1000 }),
-      },
-    });
-    usersClaims.push(usersClaim);
-  }
+  //   // Create UsersClaims
+  //   for (let i = 0; i < 10; i++) {
+  //     const usersClaim = await prisma.usersClaims.create({
+  //       data: {
+  //         user_id: users[faker.number.int({ min: 0, max: users.length - 1 })].id,
+  //         campaign_id:
+  //           campaigns[faker.number.int({ min: 0, max: campaigns.length - 1 })].id,
+  //         user_score_id:
+  //           userScores[faker.number.int({ min: 0, max: userScores.length - 1 })]
+  //             .id,
+  //         amount: faker.number.int({ min: 0, max: 1000 }),
+  //       },
+  //     });
+  //     usersClaims.push(usersClaim);
+  //   }
 
   console.log('Seed data created successfully!');
 }

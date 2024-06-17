@@ -25,15 +25,11 @@ model Users {
   created_at  DateTime        @default(dbgenerated("now()"))
   
   // Define relationships
-  tweets                Tweets[]
   wallets               Wallets[]
-  user_scores           UserScores[]
   invites_referrer      Invites[]       @relation("referrer")
   invites_invitee       Invites[]       @relation("invitee")
-  campaigns_admin       Campaigns[]     @relation("admin")
-  campaigns_participants CampaignUsers[]
+  campaigns             CampaignUsers[]
   projects              Projects[]
-  claims                UsersClaims[]   @relation("user_claims_to_users")
 
   @@map("users")
 }
@@ -41,7 +37,6 @@ model Users {
 // Define the Campaigns model
 model Campaigns {
   id                                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  admin_id                            String   @db.Uuid
   project_id                          String   @db.Uuid
   created_at                          DateTime @default(dbgenerated("now()"))
   start_date                          DateTime
@@ -66,14 +61,9 @@ model Campaigns {
   promoted                            Boolean   @default(false)
 
   // Define relationships
-  admin                  Users                   @relation("admin", fields: [admin_id], references: [id])
   project                Projects                @relation(fields: [project_id], references: [id])
-  tweets                 Tweets[]
-  campaign_retweets      CampaignRetweets[]
+  campaign_tasks         CampaignTasks[]
   users                  CampaignUsers[]
-  user_scores            UserScores[]
-  campaign_follow_accounts CampaignFollowAccounts[]
-  claims                 UsersClaims[]
 
   @@map("campaigns")
 }
@@ -81,7 +71,7 @@ model Campaigns {
 // Define the Projects model
 model Projects {
   id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
+  name      String       @unique
   slug      String       @unique
   admin_id  String       @db.Uuid
 
@@ -104,29 +94,13 @@ model Tweets {
   impression_count  Int
   text              String
   type              String
-  user_id           String    @db.Uuid
-  campaign_id       String    @db.Uuid
-  tweet_id          String
+  campaign_user_id  String    @db.Uuid
+  tweet_id          String    @unique
 
   // Define relationships
-  user      Users      @relation(fields: [user_id], references: [id])
-  campaign  Campaigns  @relation(fields: [campaign_id], references: [id])
-  user_scores UserScores[]
+  campaign_user CampaignUsers  @relation(fields: [campaign_user_id], references: [id])
 
   @@map("tweets")
-}
-
-// Define the CampaignRetweets model
-model CampaignRetweets {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_id String    @db.Uuid
-  url         String
-  points      Int
-
-  // Define relationships
-  campaign Campaigns @relation(fields: [campaign_id], references: [id])
-
-  @@map("campaign_retweets")
 }
 
 // Define the Wallets model
@@ -138,29 +112,23 @@ model Wallets {
 
   // Define relationships
   user          Users          @relation(fields: [user_id], references: [id])
-  campaign_users CampaignUsers[]
 
   @@map("wallets")
 }
 
-// Define the UserScores model
-model UserScores {
+// Define the UserPoints model
+model UserPoints {
   id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   created_at   DateTime      @default(dbgenerated("now()"))
-  user_id      String        @db.Uuid
-  campaign_id  String        @db.Uuid
-  score        Int
+  points           Int
   campaign_user_id String    @db.Uuid
-  tweet_id     String?       @db.Uuid
+  resource_id     String     @db.Uuid
+  resource_type   String
 
   // Define relationships
-  user          Users          @relation(fields: [user_id], references: [id])
-  campaign      Campaigns      @relation(fields: [campaign_id], references: [id])
-  tweet         Tweets?        @relation(fields: [tweet_id], references: [id])
-  users_claims  UsersClaims[]  @relation("user_score_claims")
   campaign_user CampaignUsers  @relation(fields: [campaign_user_id], references: [id])
 
-  @@map("user_scores")
+  @@map("user_points")
 }
 
 // Define the Invites model
@@ -180,46 +148,42 @@ model Invites {
 model CampaignUsers {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id         String    @db.Uuid
-  wallet_id       String    @db.Uuid
   campaign_id     String    @db.Uuid
   claimed_reward  Boolean
   blacklisted     Boolean
 
   // Define relationships
   user      Users      @relation(fields: [user_id], references: [id])
-  wallet    Wallets    @relation(fields: [wallet_id], references: [id])
   campaign  Campaigns  @relation(fields: [campaign_id], references: [id])
-  user_scores UserScores[]
+  user_points UserPoints[]
+  claims      UsersClaims[]
+  tweets      Tweets[]
 
   @@map("campaign_users")
 }
 
-// Define the CampaignFollowAccounts model
-model CampaignFollowAccounts {
+model CampaignTasks {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   campaign_id      String    @db.Uuid
-  twitter_account  String
+  task_url         String
+  task_type        String
   points           Int
 
   // Define relationships
   campaign Campaigns @relation(fields: [campaign_id], references: [id])
 
-  @@map("campaign_follow_accounts")
+  @@map("campaign_tasks")
 }
 
 // Define the UsersClaims model
 model UsersClaims {
   id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id        String       @db.Uuid
-  campaign_id    String       @db.Uuid
   created_at     DateTime     @default(dbgenerated("now()"))
-  user_score_id  String       @db.Uuid
+  campaign_user_id String     @db.Uuid
   amount         Int
 
   // Define relationships
-  user       Users         @relation("user_claims_to_users", fields: [user_id], references: [id])
-  campaign   Campaigns     @relation(fields: [campaign_id], references: [id])
-  user_score UserScores    @relation("user_score_claims", fields: [user_score_id], references: [id])
+  campaign_user CampaignUsers  @relation(fields: [campaign_user_id], references: [id])
 
   @@map("users_claims")
 }

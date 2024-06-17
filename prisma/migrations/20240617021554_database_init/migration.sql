@@ -15,7 +15,6 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "campaigns" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "admin_id" UUID NOT NULL,
     "project_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
     "start_date" TIMESTAMP(3) NOT NULL,
@@ -64,21 +63,10 @@ CREATE TABLE "tweets" (
     "impression_count" INTEGER NOT NULL,
     "text" TEXT NOT NULL,
     "type" TEXT NOT NULL,
-    "user_id" UUID NOT NULL,
-    "campaign_id" UUID NOT NULL,
+    "campaign_user_id" UUID NOT NULL,
     "tweet_id" TEXT NOT NULL,
 
     CONSTRAINT "tweets_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "campaign_retweets" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "campaign_id" UUID NOT NULL,
-    "url" TEXT NOT NULL,
-    "points" INTEGER NOT NULL,
-
-    CONSTRAINT "campaign_retweets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -92,16 +80,15 @@ CREATE TABLE "wallets" (
 );
 
 -- CreateTable
-CREATE TABLE "user_scores" (
+CREATE TABLE "user_points" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
-    "user_id" UUID NOT NULL,
-    "campaign_id" UUID NOT NULL,
-    "score" INTEGER NOT NULL,
+    "points" INTEGER NOT NULL,
     "campaign_user_id" UUID NOT NULL,
-    "tweet_id" UUID,
+    "resource_id" UUID NOT NULL,
+    "resource_type" TEXT NOT NULL,
 
-    CONSTRAINT "user_scores_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "user_points_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -117,7 +104,6 @@ CREATE TABLE "invites" (
 CREATE TABLE "campaign_users" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user_id" UUID NOT NULL,
-    "wallet_id" UUID NOT NULL,
     "campaign_id" UUID NOT NULL,
     "claimed_reward" BOOLEAN NOT NULL,
     "blacklisted" BOOLEAN NOT NULL,
@@ -126,22 +112,21 @@ CREATE TABLE "campaign_users" (
 );
 
 -- CreateTable
-CREATE TABLE "campaign_follow_accounts" (
+CREATE TABLE "campaign_tasks" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "campaign_id" UUID NOT NULL,
-    "twitter_account" TEXT NOT NULL,
+    "task_url" TEXT NOT NULL,
+    "task_type" TEXT NOT NULL,
     "points" INTEGER NOT NULL,
 
-    CONSTRAINT "campaign_follow_accounts_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "campaign_tasks_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "users_claims" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "user_id" UUID NOT NULL,
-    "campaign_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT now(),
-    "user_score_id" UUID NOT NULL,
+    "campaign_user_id" UUID NOT NULL,
     "amount" INTEGER NOT NULL,
 
     CONSTRAINT "users_claims_pkey" PRIMARY KEY ("id")
@@ -163,13 +148,16 @@ CREATE UNIQUE INDEX "users_twitter_id_key" ON "users"("twitter_id");
 CREATE UNIQUE INDEX "campaigns_slug_key" ON "campaigns"("slug");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "projects_name_key" ON "projects"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "projects_slug_key" ON "projects"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "wallets_address_key" ON "wallets"("address");
+CREATE UNIQUE INDEX "tweets_tweet_id_key" ON "tweets"("tweet_id");
 
--- AddForeignKey
-ALTER TABLE "campaigns" ADD CONSTRAINT "campaigns_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "wallets_address_key" ON "wallets"("address");
 
 -- AddForeignKey
 ALTER TABLE "campaigns" ADD CONSTRAINT "campaigns_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -178,28 +166,13 @@ ALTER TABLE "campaigns" ADD CONSTRAINT "campaigns_project_id_fkey" FOREIGN KEY (
 ALTER TABLE "projects" ADD CONSTRAINT "projects_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tweets" ADD CONSTRAINT "tweets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "tweets" ADD CONSTRAINT "tweets_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "campaign_retweets" ADD CONSTRAINT "campaign_retweets_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tweets" ADD CONSTRAINT "tweets_campaign_user_id_fkey" FOREIGN KEY ("campaign_user_id") REFERENCES "campaign_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "wallets" ADD CONSTRAINT "wallets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_tweet_id_fkey" FOREIGN KEY ("tweet_id") REFERENCES "tweets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_scores" ADD CONSTRAINT "user_scores_campaign_user_id_fkey" FOREIGN KEY ("campaign_user_id") REFERENCES "campaign_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_points" ADD CONSTRAINT "user_points_campaign_user_id_fkey" FOREIGN KEY ("campaign_user_id") REFERENCES "campaign_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "invites" ADD CONSTRAINT "invites_referrer_id_fkey" FOREIGN KEY ("referrer_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -211,19 +184,10 @@ ALTER TABLE "invites" ADD CONSTRAINT "invites_invitee_id_fkey" FOREIGN KEY ("inv
 ALTER TABLE "campaign_users" ADD CONSTRAINT "campaign_users_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "campaign_users" ADD CONSTRAINT "campaign_users_wallet_id_fkey" FOREIGN KEY ("wallet_id") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "campaign_users" ADD CONSTRAINT "campaign_users_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "campaign_follow_accounts" ADD CONSTRAINT "campaign_follow_accounts_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "campaign_tasks" ADD CONSTRAINT "campaign_tasks_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users_claims" ADD CONSTRAINT "users_claims_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users_claims" ADD CONSTRAINT "users_claims_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users_claims" ADD CONSTRAINT "users_claims_user_score_id_fkey" FOREIGN KEY ("user_score_id") REFERENCES "user_scores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "users_claims" ADD CONSTRAINT "users_claims_campaign_user_id_fkey" FOREIGN KEY ("campaign_user_id") REFERENCES "campaign_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
