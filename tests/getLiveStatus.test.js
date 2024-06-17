@@ -221,11 +221,7 @@ describe('getLiveStatus', () => {
     expect(status.isFinished).toBe(false);
     expect(status.timeUntilEnd).toBeNull();
     expect(status.timeSinceStart).toBeNull();
-    expect(status.timeUntilStart).toEqual({
-      days: 30,
-      hours: 0,
-      minutes: 0,
-    });
+    expect(status.timeUntilStart).toBeNull();
   });
 
   test('Campaign started exactly now', () => {
